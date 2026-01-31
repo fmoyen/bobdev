@@ -1,0 +1,9 @@
+Hello, World!
+This is a test file with various ASCII characters:
+- Uppercase: ABCDEFGHIJKLMNOPQRSTUVWXYZ
+- Lowercase: abcdefghijklmnopqrstuvwxyz
+- Numbers: 0123456789
+- Special: !@#$%^&*()_+-=[]{}|;':",.<>?/\
+- Tab:	between words
+- Newlines and spaces are also included.
+End of file.
