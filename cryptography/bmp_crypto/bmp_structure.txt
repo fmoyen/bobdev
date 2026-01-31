@@ -1,16 +1,55 @@
+https://fr.wikipedia.org/wiki/Windows_bitmap#Liens_externes
+https://www.alrj.org/docs/formats/bmp/BMP.htm
+
 ############################################################################################################
 ENTETE
 
-0x0000 - 0x0001 : Signature BM = 42 4D
-0x0002 - 0x0005 : Taille du fichier en octet
-0x0006 - 0x0007 : Réservé pour l'application qui a servi à créer le fichier
-0x0008 - 0x0009 : Réservé pour l'application qui a servi à créer le fichier
-0x000A - 0x000D : L'offset (l'adresse de départ) du contenu du BMP
+0x0000 - 0x0001 (2 octets) : Signature BM = 42 4D
+0x0002 - 0x0005 (4 octets) : Taille du fichier en octets
+0x0006 - 0x0007 (2 octets) : Réservé pour l'application qui a servi à créer le fichier
+0x0008 - 0x0009 (2 octets) : Réservé pour l'application qui a servi à créer le fichier
+0x000A - 0x000D (4 octets) : L'offset (l'adresse de départ) du contenu du BMP
 
 ############################################################################################################
 BITMAP INFO
 
-0x000E - 0x0011 : Taille de la zone Bitmap Info
-0x0012 - 0x0015 : Largeur de l'image en pixels
-0x0016 - 0x0019 : Hauteur de l'image en pixels
-0x001A - 0x001B : Nombre de plans (1)
+0x000E - 0x0011 (4 octets) : Taille de la zone Bitmap Info
+0x0012 - 0x0015 (4 octets) : Largeur de l'image en pixels
+0x0016 - 0x0019 (4 octets) : Hauteur de l'image en pixels
+0x001A - 0x001B (2 octets) : Nombre de plans (1)
+0x001C - 0x001D (2 octets) : Nombre de bits par pixel (1=monochrome, 4=16 couleurs,8=256 couleurs, 24d=18h=16 M de couleurs)
+0x001E - 0x0021 (4 octets) : Format de compression de l'image (0=non compressé, 1=compressée 8 bits par pixel (RLE8), 2=compressée 4 bits par pixel (RLE4)
+0x0022 - 0x0025 (4 octets) : Taille de l'image en octets (taille du fichier - taille de l'image = offset du contenu du BMP)
+0x0026 - 0x0029 (4 octets) : Résolution horizontale en pixels par mètre (utilisée par les imprimeurs)
+0x002A - 0x002D (4 octets) : Résolution verticale en pixels par mètre (utilisée par les imprimeurs)
+0x002E - 0x0031 (4 octets) : Nombre de couleurs utilisées (0=maximum possible. Si l'image est 24 bits, spécifie la taille de la palette de couleurs de référence utilisée pour optimiser les palettes Windows)
+0x0032 - 0x0035 (4 octets) : Nombre d'index de couleurs importants pour l'affichage (0 <=> toutes les couleurs importantes)
+
+############################################################################################################
+PALETTE (BMP 8 bits)
+
+0x0036 - 0x0435
+
+Le BMP 8 bits ne permet que de représenter 256 couleurs. Il est donc nécessaire de définir un système de correspondance entre la valeur du pixel et les trois composantes qui apparaissent dans l'ordre Bleu, Vert, Rouge.
+C'est un tableau de 256 lignes (256 couleurs) contenant la liste des couleurs (0 à 255) pour le mode 8 bits. Il suit immédiatement la zone Bitmap Info (offset 54d=36h), et n'est présent qu'en mode 8 bits.
+Une couleur est codée sur 4 octets : R:G:B:Réservé. La taille de la palette est donc de 1024 octets (256 couleurs x 4 octets).
+
+Notes:
+------
+
+  - Le BMP 24 bits permet d'allouer 1 octet bleu, 1 octet vert et 1 octet rouge par pixel. N'étant donc pas nécessaire, la palette n'est pas présente dans le fichier BMP 24 bits.
+
+  - Il existe également un format BMP sur 1 et 4 bits.
+
+############################################################################################################
+L'IMAGE
+
+Elle suit normalement directement la zone BitMap Info (ou la palette, s'il y en a une), mais il est préférable d'y accéder via l'offset définit dans le header (0Ah).
+Elle est stockée normalement, suivant le format définit dans 1Ch et 1Eh (en 24 bits, c'est R:G:B:X)
+
+Attention :
+-----------
+
+  - l'image est stockée de à l'envers : il faut la lire en BGR.
+  - L’image est codée de la dernière ligne à la première, de gauche à droite.
+  - La largeur de l’image en octets est toujours un multiple de 4. Si ce n’est pas le cas, la fin de la ligne est complétée avec de zéros.
